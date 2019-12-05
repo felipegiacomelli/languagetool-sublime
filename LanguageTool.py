@@ -343,6 +343,8 @@ class LanguageToolCommand(sublime_plugin.TextCommand):
         server_url = get_server_url(settings, force_server)
         ignored_scopes = settings.get('ignored-scopes')
         highlight_scope = settings.get('highlight-scope')
+        ignored_words = settings.get('ignored-words')
+        credentials_file = settings.get('credentials_file')
 
         selection = self.view.sel()[0]  # first selection (ignore rest)
         everything = sublime.Region(0, self.view.size())
@@ -355,7 +357,7 @@ class LanguageToolCommand(sublime_plugin.TextCommand):
         ignored_ids = [rule['id'] for rule in load_ignored_rules()]
 
         matches = LTServer.getResponse(server_url, check_text, language,
-                                       ignored_ids)
+                                       ignored_ids, credentials_file)
 
         if matches == None:
             set_status_bar('could not parse server response (may be due to'
@@ -375,9 +377,11 @@ class LanguageToolCommand(sublime_plugin.TextCommand):
 
         def is_ignored(problem):
             """Return True iff any problem scope is ignored."""
+            region = get_region(problem)
+            word = self.view.substr(region)
             scope_string = self.view.scope_name(problem['offset'])
             scopes = scope_string.split()
-            return cross_match(scopes, ignored_scopes, fnmatch.fnmatch)
+            return cross_match(scopes, ignored_scopes, fnmatch.fnmatch) or word in ignored_words
 
         def add_highlight_region(region_key, problem):
             region = get_region(problem)

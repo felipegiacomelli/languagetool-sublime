@@ -10,5 +10,10 @@
         "meta.*.latex",
         "comment.*.tex",
         "keyword.control.tex"
+    ],
+    "credentials_file": ".languagetool-credentials.json",
+    "ignored-words": [
+        "geomechanics",
+        "poroelasticity"
     ]
 }
